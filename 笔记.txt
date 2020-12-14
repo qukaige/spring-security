@@ -1,0 +1,120 @@
+MVC 开发RESTfulAPI 接口
+	传统模式:
+		传统的查询,修改,删除都是GET或者POST
+		参数以queryString 方式 a=1&b=2 等..
+	RESTfulAPI中:
+		用URL描述资源
+		用HTTP方法描述行为(GET查询详情/POST创建/PUT修改/DELETE删除),使用HTTP状态码来表示不同的结果.
+		参数JSON方式交互
+		RESTfulAPI 只是风格,不是强制标准
+
+常用注解:
+	@RestController: 标记Controller提供RESTAPI
+	@RequestMapping(value = "/user", method = RequestMethod.GET) 标记http请求到具体方法
+	@PostMapping
+	@GetMapping
+	@RequestParam 参数映射
+	@PageableDefault(page = 2, size = 17, sort = "username,asc") 指定分页默认参数
+	@PathVariable :  映射路由参数/xx/${id}
+	@JsonView 
+		使用接口声明多个视图
+		在属性的get方法上指定视图
+		在Controller的方法上指定视图
+	@RequestBody 解析映射传入的参数JSON字符串
+	@Valid 校验属性合法性 , 需要和BindingResult 类配合使用
+		属性常用的验证注解..
+	自定义验证注解:
+		第一步创建注解类:
+		第二步创建具体实现类(验证逻辑)继承ConstraintValidator<注解类, 属性的类型Object>
+
+
+生成图形验证码
+	根据随机数生成图片
+	将随机数放入session
+	将生成的图片写到响应中,显示到前端
+重构图形验证码接口
+	验证码的基本参数可配
+	验证码拦截的接口可配置
+	验证码逻辑可配  (以增量的方式去适应变化)
+第一步: 创建ValidateCodeGenerator 接口 generate方法
+第二步: 创建ImageCodeGenerator implements ValidateCodeGenerator 验证码的具体实现逻辑
+第三步: 创建验证码的配置类 ValidateCodeBeanConfig.java
+第四步: 创建ValidateCodeFilter extends OncePerRequestFilter implements InitializingBean
+第五步: 将Filter 加入到过滤器链中
+.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
+
+实现记住我功能
+	1. 创建PersistentTokenRepository JdbcTokenRepositoryImpl
+	2. 设置过期时间
+	3. 获取UserDetailsService 用户登录信息
+	4. 配置rememberMe 生效
+	and()
+    .rememberMe()
+    .tokenRepository(persistentTokenRepository())
+    .tokenValiditySeconds(3600)
+    .userDetailsService(获取UserDetailsService)
+实现短信验证码接口
+	1. 生成验证码
+	2. 存入session
+	3. 发送给手机验证码
+仿写短信认证逻辑
+	1. token认证信息
+	SmsCodeAuthenticationToken extends AbstractAuthenticationToken
+	2. 创建	 Provider, 根据token类型AuthenticationManager 会调用响应的Provider,获取UserDetailsService user信息等
+	SmsCodeAuthenticationProvider implements AuthenticationProvider
+	3. 创建filter 具体拦截什么请求,生成 Token
+	SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessingFilter
+	4. 创建配置类
+	SmsCodeAuthenticationSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> 
+	实现configure 方法 添加自定义的SmsCodeAuthenticationProvider, 和SmsCodeAuthenticationFilter
+	5.在项目中引用:
+	.apply(smsCodeAuthenticationSecurityConfig);
+使用SpringSocial 开发第三方登录
+	OAuth 协议
+		OAuth协议要解决的问题
+			解决传统模式的授权(授权协议),认证资源访问问题
+		OAuth协议中的各种角色
+			Privider 服务提供商(提供令牌) (微信)
+				Authorization Server 认证服务器
+				ResourceServer 资源服务器
+			Resource Owner 资源所有者 (用户)
+			Client 第三方应用
+		OAuth协议运行流程
+			0访问Client
+			1将用户导向认证服务器
+			2用户同意授权
+			3返回Client并携带授权码
+			4申请令牌
+			5发放令牌 (1-5是OAuth标准流程)
+			6获取用户信息 (每个服务商提供返回的字段不一样)
+			7根据用户信息构建Authentictioin并放入SecurityContext
+		OAuth协议授权模式
+			授权码模式 (authorization code)
+				认证授权在服务器提供商认证服务器完成,更安全
+			密码模式(Resource owner password credentials)
+			客户端模式(client credentials)
+			简化模式(implicit)
+	SpringSocial 基本原理 (就是封装了OAuth2的基本流程 SocialAuthenticationFilter加入到过滤器链中)
+		ServiceProvider (AbstractOAuth2ServiceProvider服务提供商的抽象实现)
+            OAuth2Operations (OAuth2Template 封装1-5 会帮你去完成OAuth的认证流程)
+            Api(AbstractOAuth2ApiBinding获取用户信息抽象实现 6)
+		第7步是在第三方应用上操作
+		Connection(OAuth2Connection服务提供商的信息)  是由 ConnectionFactory(OAuth2ConnectionFactory) 创建的
+		ConnectionFactory 中是包含(ServiceProvider 的)
+		ApiAdapter  (在Aip 和 Connection之间做一个适配,因为Connection字段是固定的,服务商是个性化的)
+		用户和第三方用户有个关联表,UserConnection
+		UserConnection 表是由 JdbcUsersConnectionRepository(UsersConnectionRepository) 这个类进行操作CRUD
+开发QQ登录
+	第一步(6获取用户信息): 根据OAuth2Operations (OAuth2Template),Api(AbstractOAuth2ApiBinding) 构建ServiceProvider
+		创建API 获取用户信息接口 QQImpl.java extends AbstractOAuth2ApiBinding
+		创建QQOAuth2Template　
+		    构建ServiceProvider　
+	第二步: 得到 ServiceProvider后 创建 ApiAdapter 
+		创建QQServiceProvider extends AbstractOAuth2ServiceProvider<QQ>
+			 OAuth2Template 用系统默认的
+	第三步: 根据ServiceProvider,ApiAdapter 创建 ConnectionFactory(OAuth2ConnectionFactory) 
+		创建QQAdapter implements ApiAdapter<QQ>
+		创建QQConnectionFactory extends OAuth2ConnectionFactory<QQ>
+	第四步: 获取Connection(OAuth2Connection)  在 第三步中获取(ConnectionFactory(OAuth2ConnectionFactory) )
+	第五步: 配置数据源 UsersConnectionRepository(JdbcUsersConnectionRespsitory)
+		创建SocialConfig extends SocialConfigurerAdapter 重写getUsersConnectionRepository方法

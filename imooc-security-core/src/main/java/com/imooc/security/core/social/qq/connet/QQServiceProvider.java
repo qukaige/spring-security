@@ -13,7 +13,9 @@ import org.springframework.social.oauth2.OAuth2Template;
 public class QQServiceProvider extends AbstractOAuth2ServiceProvider<QQ> {
 
     private String appId;
+    // 1.导向认证服务器rul
     private static final String URL_AUTHORIZE = "https://graph.qq.com/oauth2.0/authorize";
+    // 4.用户同意授权,返回授权码去申请令牌的url
     private static final String URL_ACCESS_TOKEN = "https://graph.qq.com/oauth2.0/token";
     public QQServiceProvider(String appId, String appSecret) {
 //        super(oauth2Operations);

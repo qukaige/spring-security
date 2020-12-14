@@ -30,6 +30,7 @@ public class QQImpl extends AbstractOAuth2ApiBinding implements QQ {
         String url = String.format(URL_GET_OPENID, accessToken);
         String result = getRestTemplate().getForObject(url, String.class);
         log.info(result);
+        // 截取一下openId
         this.openId = StringUtils.substringBetween(result, "\"openid\":\"", "\"}");
     }
 
@@ -37,9 +38,7 @@ public class QQImpl extends AbstractOAuth2ApiBinding implements QQ {
     public QQUserInfo getUserInfo() {
         String url = String.format(URL_GET_USERINFO, appId, openId);
         String result = getRestTemplate().getForObject(url, String.class);
-
         log.info(result);
-
         QQUserInfo userInfo = null;
         try {
             userInfo = objectMapper.readValue(result, QQUserInfo.class);

@@ -106,7 +106,7 @@ public class BrowserSecurityConfig  extends WebSecurityConfigurerAdapter {
                         "/qqLogin/*",
                         "/auth/*",
                         securityProperties.getBrowser().getLoginPage(),
-                        "/code/*").permitAll()
+                        "/code/*","/user/regist","/user/me").permitAll()
                 .anyRequest() // 所有请求
                 .authenticated()
                 .and()  // 关闭csrf

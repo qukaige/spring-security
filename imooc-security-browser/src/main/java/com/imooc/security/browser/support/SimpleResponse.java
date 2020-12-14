@@ -1,12 +1,5 @@
-/**
- * 
- */
 package com.imooc.security.browser.support;
 
-/**
- * @author zhailiang
- *
- */
 public class SimpleResponse {
 	
 	public SimpleResponse(Object content){
