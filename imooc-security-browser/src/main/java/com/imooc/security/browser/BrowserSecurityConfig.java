@@ -27,10 +27,7 @@ public class BrowserSecurityConfig  extends WebSecurityConfigurerAdapter {
     private AuthenticationSuccessHandler imoocAuthenticationSuccessHandler;
     @Autowired
     private AuthenticationFailureHandler imoocAuthenctiationFailureHandler;
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new SCryptPasswordEncoder();
-    }
+
 
     @Autowired
     private SecurityProperties securityProperties;

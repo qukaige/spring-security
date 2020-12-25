@@ -10,9 +10,15 @@
     </parent>
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.imooc.security</groupId>
             <artifactId>imooc-security-browser</artifactId>
+            <version>${imooc.security.version}</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>com.imooc.security</groupId>
+            <artifactId>imooc-security-app</artifactId>
             <version>${imooc.security.version}</version>
         </dependency>
         <!--测试框架-->

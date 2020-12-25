@@ -1,14 +1,7 @@
-/**
- * 
- */
 package com.imooc.security.core.properties;
 
 import org.springframework.boot.autoconfigure.social.SocialProperties;
 
-/**
- * @author zhailiang
- *
- */
 public class WeixinProperties extends SocialProperties {
 	
 	/**

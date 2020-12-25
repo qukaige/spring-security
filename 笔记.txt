@@ -118,3 +118,15 @@ MVC 开发RESTfulAPI 接口
 	第四步: 获取Connection(OAuth2Connection)  在 第三步中获取(ConnectionFactory(OAuth2ConnectionFactory) )
 	第五步: 配置数据源 UsersConnectionRepository(JdbcUsersConnectionRespsitory)
 		创建SocialConfig extends SocialConfigurerAdapter 重写getUsersConnectionRepository方法
+session 管理
+    session超时
+    session并发控制
+    session集群管理
+退出处理
+
+Spring Security OAuth 开发App认证框架
+    实现一个标准的OAuth2协议中的provider(服务提供商)角色的主要功能
+        provider 包含 AuthorizationServer(认证服务器) 和 ResourceServer(资源服务器)
+    重构之前的3种认证方式的代码,使其支持Token
+    高级特性
+
